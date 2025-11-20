@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev":"tsx watch --env-file .env src/infra/http/server.ts",
+    "dev": "tsx watch --env-file .env src/infra/http/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +13,9 @@
   "type": "module",
   "dependencies": {
     "@fastify/cors": "^11.1.0",
+    "@fastify/multipart": "^9.3.0",
+    "@fastify/swagger": "^9.6.1",
+    "@fastify/swagger-ui": "^5.2.3",
     "fastify": "^5.6.2",
     "fastify-type-provider-zod": "^6.1.0",
     "zod": "^4.1.12"
