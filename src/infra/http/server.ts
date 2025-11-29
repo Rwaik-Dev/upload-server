@@ -1,16 +1,15 @@
 import { fastifyCors } from '@fastify/cors'
 import fastifyMultipart from '@fastify/multipart'
 import fastifySwagger from '@fastify/swagger'
+import fastifySwaggerUi from '@fastify/swagger-ui'
 import fastify from 'fastify'
 import {
   hasZodFastifySchemaValidationErrors,
-  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
 } from 'fastify-type-provider-zod'
-import { env } from '@/env'
-import { uploadImageRoute } from '../routes/upload-image'
-import fastifySwaggerUi from '@fastify/swagger-ui'
+import { uploadImageRoute } from './routes/upload-image'
+import { transformSwaggerSchema } from './transform-swagger-schema'
 
 const server = fastify()
 
@@ -31,8 +30,6 @@ server.setErrorHandler((error, request, reply) => {
 })
 
 //Rotas
-server.register(uploadImageRoute)
-
 server.register(fastifyCors, { origin: '*' })
 
 server.register(fastifyMultipart)
@@ -44,11 +41,14 @@ server.register(fastifySwagger, {
       version: '1.0.0',
     },
   },
-  transform: jsonSchemaTransform,
+  transform: transformSwaggerSchema,
 })
+
 server.register(fastifySwaggerUi, {
   routePrefix: '/docs',
 })
+
+server.register(uploadImageRoute)
 
 server
   .listen({
