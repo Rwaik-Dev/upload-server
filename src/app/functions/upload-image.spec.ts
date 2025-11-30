@@ -5,8 +5,8 @@ import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { db } from '@/infra/db'
 import { schema } from '@/infra/db/schemas'
 import { isLeft, isRight, unwrapEither } from '@/infra/shared/either'
+import { InvalidFileFormat } from './erros/invalid-file-format'
 import { uploadImage } from './upload-image'
-import { InvalidFileFormat } from '../erros/invalid-file-format'
 
 describe('uploadImage', () => {
   beforeAll(() => {
@@ -53,6 +53,5 @@ describe('uploadImage', () => {
     expect(isLeft(sut)).toBe(true)
 
     expect(unwrapEither(sut)).toBeInstanceOf(InvalidFileFormat)
-
   })
 })
