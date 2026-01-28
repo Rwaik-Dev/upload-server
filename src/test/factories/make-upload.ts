@@ -1,5 +1,5 @@
 import { fakerPT_BR as faker } from '@faker-js/faker'
-import { InferInsertModel } from 'drizzle-orm'
+import type { InferInsertModel } from 'drizzle-orm'
 import { db } from '@/infra/db'
 import { schema } from '@/infra/db/schemas'
 

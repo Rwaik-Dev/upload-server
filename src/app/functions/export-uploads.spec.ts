@@ -1,11 +1,21 @@
 import { randomUUID } from 'node:crypto'
-import { describe, expect, it } from 'vitest'
-import { isRight, unwrapEither } from '@/infra/shared/either'
+import { describe, expect, it, vi } from 'vitest'
+import * as upload from '@/infra/storage/upload-file-to-storage'
 import { makeUpload } from '@/test/factories/make-upload'
 import { exportUploads } from './export-uploads'
+import { isRight, unwrapEither } from '@/infra/shared/either'
 
 describe('getUploads', () => {
   it('should be able to export uploads', async () => {
+    const uploadSpy = vi
+      .spyOn(upload, 'uploadFileToStorage')
+      .mockImplementationOnce(async () => {
+        return {
+          key: `${randomUUID()}.jpg`,
+          url: 'https://example.com/image.jpg',
+        }
+      })
+
     const namePattern = randomUUID()
 
     const upload1 = await makeUpload({ name: `${namePattern}.webp` })
@@ -18,6 +28,42 @@ describe('getUploads', () => {
       searchQuery: namePattern,
     })
 
-  })
+    const generatedCSVStream = uploadSpy.mock.calls[0][0].contentStream
 
+    const csvAsString = await new Promise<string>((resolve, reject) => {
+      const chunks: Buffer[] = []
+
+      generatedCSVStream.on('data', (chunk: Buffer) => {
+        chunks.push(chunk)
+      })
+
+      generatedCSVStream.on('end', () => {
+        resolve(Buffer.concat(chunks).toString('utf-8'))
+      })
+
+      generatedCSVStream.on('error', error => {
+        reject(error)
+      })
+    })
+
+    const csvAsArray = csvAsString
+      .trim()
+      .split('\n')
+      .map(row => row.split(','))
+
+      console.log(csvAsArray)
+
+    expect(isRight(sut)).toBe(true)
+    expect(unwrapEither(sut)).toEqual({
+      reportUrl: 'https://example.com/image.jpg',
+    })
+    expect(csvAsArray).toEqual([
+      ['ID', 'Name', 'URL', 'Uploaded at'],
+      [upload1.id, upload1.name, upload1.remoteUrl, expect.any(String)],
+      [upload2.id, upload2.name, upload2.remoteUrl, expect.any(String)],
+      [upload3.id, upload3.name, upload3.remoteUrl, expect.any(String)],
+      [upload4.id, upload4.name, upload4.remoteUrl, expect.any(String)],
+      [upload5.id, upload5.name, upload5.remoteUrl, expect.any(String)],
+    ])
+  })
 })
